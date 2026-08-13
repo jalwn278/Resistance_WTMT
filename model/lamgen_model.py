@@ -12,7 +12,7 @@ class CustomCrossAttention(nn.Module):
         super(CustomCrossAttention, self).__init__()
         self.num_heads = num_heads
         assert d_k % num_heads == 0
-        self.head_dim = d_k // num_heads
+        self.head_dim = d_k // num_heads#guarantee head's dimension be same
 
         self.d_k = d_k
         self.query_proj = nn.Linear(d_model_q, d_k)
@@ -79,16 +79,19 @@ class CrossSelfAttention(GPT2Attention):
         key = self._split_heads(key, self.num_heads, self.head_dim)
         value = self._split_heads(value, self.num_heads, self.head_dim)
 
+        #if history buffle exist
         if layer_past is not None:
             past_key, past_value = layer_past
             key = torch.cat((past_key, key), dim=-2)
             value = torch.cat((past_value, value), dim=-2)
 
+        #If need history data stick it
         if use_cache is True:
             present = (key, value)
         else:
             present = None
 
+        #selfattention's concise
         if self.reorder_and_upcast_attn:
             attn_output, attn_weights = self._upcast_and_reordered_attn(query, key, value, attention_mask, head_mask)
         else:
@@ -132,12 +135,12 @@ class FeedForwardNetwork(nn.Module):
             embedding_dim: int,
             ffn_embedding_dim: int,
             activation_dropout: float = 0.1,
-            max_tokens_per_msa: int = 2 ** 14,
+            #max_tokens_per_msa: int = 2 ** 14,
     ):
         super().__init__()
         self.embedding_dim = embedding_dim
         self.ffn_embedding_dim = ffn_embedding_dim
-        self.max_tokens_per_msa = max_tokens_per_msa
+        #self.max_tokens_per_msa = max_tokens_per_msa
         self.activation_fn = nn.GELU()
         self.activation_dropout_module = nn.Dropout(
             activation_dropout,
@@ -152,9 +155,9 @@ class FeedForwardNetwork(nn.Module):
         return x
 
 
-class LaMGen_dual(nn.Module):
+class LaMGen_dual(nn.Module):#inherit from nn.module
     def __init__(self, pretrain_path, config):
-        super(LaMGen_dual, self).__init__()
+        super(LaMGen_dual, self).__init__() #call father class's init
         self.mol_model = GPT2LMHeadModel.from_pretrained(pretrain_path)
         self.CrossSelfAttention = CrossSelfAttention(config=config)
         self.up_sample = nn.Linear(2560, config.n_embd)

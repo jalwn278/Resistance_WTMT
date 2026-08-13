@@ -1,5 +1,5 @@
 from transformers import BertTokenizer
-from typing import Dict, List, Tuple
+from typing import List
 
 class WordTokenizer:
     def __init__(self) -> None:
@@ -60,9 +60,9 @@ class ExpressionBertTokenizer(BertTokenizer):
             mask_token=mask_token,
             **kwargs,
         )
-        self.text_tokenizer = WordTokenizer()
+        #self.text_tokenizer = WordTokenizer()
         if pad_even:
-            self.pad_even_fn = lambda x: x if len(x) % 2 == 0 else x + [self.pad_token]
+            self.pad_even_fn = lambda x: x if len(x) % 2 == 0 else x + [self.pad_token]#['c', 'c', '0', '[pad]']
         else:
             self.pad_even_fn = lambda x: x
 

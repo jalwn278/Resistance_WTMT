@@ -1,3 +1,11 @@
+"""copy                    复制分子对象
+networkx                将分子表示为图
+numpy                   矩阵和坐标计算
+Chem                    RDKit 分子操作
+Geometry.Point3D        设置三维坐标
+AllChem                 构象嵌入、优化和对齐
+rdMolTransforms         读取和设置二面角
+differential_evolution  全局搜索最优扭转角"""
 import copy
 import networkx as nx
 import numpy as np

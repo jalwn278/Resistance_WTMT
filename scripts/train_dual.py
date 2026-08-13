@@ -1,19 +1,19 @@
-import os
-import re
+import os#路径和环境变量
+import re#SMILES 正则切分
 import sys
-import pickle
-import torch
-import argparse
-import random
-import logging
-import numpy as np
-import pandas as pd
-from tqdm.auto import tqdm
-from torch.optim import AdamW
-from transformers import get_scheduler, GPT2Config
-from torch.utils.data import Dataset, DataLoader
-from torch import distributions
-import torch.nn.functional as F
+import pickle#读取二进制数据
+import torch#模型训练
+import argparse#命令行参数
+import random#随机种子
+import logging#保存训练日志
+import numpy as np#数组和数据集划分
+import pandas as pd#读取 CSV
+from tqdm.auto import tqdm#进度条
+from torch.optim import AdamW#参数优化器
+from transformers import get_scheduler, GPT2Config#学习率调度 模型配置
+from torch.utils.data import Dataset, DataLoader#单条数据读取 batch 构造
+from torch import distributions#正态分布软标签
+import torch.nn.functional as F#log_softmax、one_hot 等函数
 import torch.multiprocessing as mp
 import torch.nn as nn
 from torch.utils.data.distributed import DistributedSampler
@@ -22,12 +22,13 @@ import torch.distributed as dist
 from datetime import timedelta
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils.early_stop.pytorchtools import EarlyStopping
-from model.lamgen_model import LaMGen_dual
-from utils.bert_tokenizer import ExpressionBertTokenizer
+from utils.early_stop.pytorchtools import EarlyStopping#验证集不改善时保存/停止
+from model.lamgen_model import LaMGen_dual#双靶点生成模型
+from utils.bert_tokenizer import ExpressionBertTokenizer#token ↔ ID
 
 abs_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+#basic rules of handling CL->L C[C@H] -> C [C@H]
 br_re = re.compile('Br')
 cl_re = re.compile('Cl')
 smiles_token_re = re.compile('(\[[^\[\]]{1,6}\])')
@@ -94,7 +95,7 @@ def setup_args():
     return parser.parse_args()
 
 
-def get_all_normal_dis_pdf(voc_len=836, confs_num=629):
+def get_all_normal_dis_pdf(voc_len=836, confs_num=629):#dev
     means = torch.arange(1, confs_num + 1).float()
     std_dev = 2.0
     normal_dist_list = [distributions.Normal(mean, std_dev) for mean in means]
@@ -121,8 +122,7 @@ def get_all_normal_dis_pdf(voc_len=836, confs_num=629):
     return pdf_tensor
 
 
-def calculate_loss_and_accuracy_confs(outputs, labels, device):
-    pdf_tensor = get_all_normal_dis_pdf().to(device)
+def calculate_loss_and_accuracy_confs(outputs, labels, device):#for torsion token
 
     logits = outputs.logits
 
@@ -163,7 +163,7 @@ def calculate_loss_and_accuracy_confs(outputs, labels, device):
     return loss, accuracy
 
 
-def calculate_loss_and_accuracy(outputs, labels, device):
+def calculate_loss_and_accuracy(outputs, labels, device):#for chemistry token
     logits = outputs.logits
 
     # Shift logits and labels for next token prediction
@@ -231,7 +231,7 @@ class Cluster_Dataset(Dataset):
 
             print('$$$$$$$$$$$$ You should input index of dataset $$$$$$$$$$$$')
 
-    def __getitem__(self, index):
+    def __getitem__(self, index):#extract protein to return ligand
         geo = self.geos[index]
         geo = geo.replace("'", "").replace("[", "").replace("]", "").replace(",", "").strip()
         tok = tokenize(self.smiles[index])
@@ -258,7 +258,7 @@ class Cluster_Dataset(Dataset):
     def __len__(self):
         return len(self.protein_list1)
 
-    def collate_fn(self, mix_batch):
+    def collate_fn(self, mix_batch):#zip & padding
         batch, protein_batch1, protein_batch2 = list(zip(*mix_batch))
         input_ids = []
 
@@ -282,12 +282,12 @@ class Cluster_Dataset(Dataset):
             protein_ids1[btc_idx, :len(protein_batch1[btc_idx]), :] = protein_batch1[btc_idx]
             protein_ids2[btc_idx, :len(protein_batch2[btc_idx]), :] = protein_batch2[btc_idx]
 
-        return (torch.tensor(input_ids, dtype=torch.long),
+        return (torch.tensor(input_ids, dtype=torch.long), # matrix化
             torch.tensor(protein_ids1, dtype=torch.float32),
             torch.tensor(protein_ids2, dtype=torch.float32))
 
 
-def setup(rank, world_size):
+def setup(rank, world_size):#mulyiple core processing
     os.environ['MASTER_ADDR'] = '127.0.0.1'
     os.environ['MASTER_PORT'] = '22223'
     dist.init_process_group("nccl", rank=rank, timeout=timedelta(seconds=7200), world_size=world_size)
@@ -295,7 +295,7 @@ def setup(rank, world_size):
     ws = dist.get_world_size()
     return rank, ws
 
-def set_dataset(args):
+def set_dataset(args):#read csv cut trainset and valset
 
     csv_path = abs_path + '/data/cluster_2targets.csv'
     data_df = pd.read_csv(csv_path)
@@ -321,7 +321,7 @@ def tokenize(smiles):
     return ' '.join(tokenized) + ' GEO'
 
 
-def init_logging(rank):
+def init_logging(rank):#log single core
     logger = logging.getLogger()
     logger.setLevel(logging.INFO)
 
@@ -440,7 +440,7 @@ def train(rank, args, world_size):
             evaluate(model, val_loader, args=args)
 
 
-def evaluate(model, dataloader, args):
+def evaluate(model, dataloader, args):#evaluate and score
 
     device = torch.device(f"cuda:{dist.get_rank()}") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -491,7 +491,7 @@ def evaluate(model, dataloader, args):
     logging.info(f"SMILES loss: {np.mean(smi_loss_list):.4f}, SMILES acc: {np.mean(smi_acc_list):.4f}")
 
 
-def get_parameter_number(model):
+def get_parameter_number(model):#parameter number count
     total_num = sum(p.numel() for p in model.parameters())
     trainable_num = sum(p.numel() for p in model.parameters() if p.requires_grad)
     return {'Total': total_num, 'Trainable': trainable_num}

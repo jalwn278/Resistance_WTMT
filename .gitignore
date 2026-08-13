@@ -1,0 +1,69 @@
+# =========================
+# Python cache
+# =========================
+__pycache__/
+*.py[cod]
+
+# =========================
+# IDE / notebook
+# =========================
+.idea/
+.vscode/
+.ipynb_checkpoints/
+test.ipynb
+
+# =========================
+# Local backup files
+# =========================
+*.bak
+*.save
+setup_server.sh.before_*
+setup_server.sh.env_pass
+
+# =========================
+# Resistance project outputs
+# =========================
+resistance_project/embeddings/
+resistance_project/embeddings_*_test/
+resistance_project/generation/
+resistance_project/generation_*_test/
+resistance_project/cache/
+
+# =========================
+# Environment development records
+# =========================
+resistance_project/environment/archive/
+resistance_project/environment/records/
+resistance_project/environment/source_snapshot/
+
+resistance_project/environment/*_full.yml
+resistance_project/environment/*_requirements.txt
+resistance_project/environment/system_info.txt
+resistance_project/environment/lamgen_git_commit.txt
+
+# Special Transformers source backup
+resistance_project/environment/vendor/transformers-4.57.6-esmc.tar.gz
+resistance_project/environment/vendor/transformers-4.57.6-esmc.sha256
+
+# =========================
+# Local generated results
+# =========================
+generation/
+# ============================================================
+# Large model / deployment assets
+# Keep locally, distribute separately (e.g. GitHub Release)
+# ============================================================
+
+/Pretrained_model/pytorch_model.bin
+/checkpoint/dual/dual_target_ckpt
+/checkpoint/triple/triple_target_ckpt
+
+/resistance_project/environment/assets/lamgen_generation_assets.tar.gz
+
+# Custom Transformers source backup.
+# The tested wheel is kept in the repository instead.
+/resistance_project/environment/vendor/transformers-4.57.6-esmc.tar.gz
+/resistance_project/environment/vendor/transformers-4.57.6-esmc.sha256
+# Local/raw target data not used by the current tracked training scripts
+/data/Dual_targets.csv
+/data/Triple_target.csv

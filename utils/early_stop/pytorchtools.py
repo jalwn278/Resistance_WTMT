@@ -23,6 +23,13 @@ class EarlyStopping:
         self.early_stop = False
         self.val_loss_min = np.Inf
         self.delta = delta
+        """patience    最多允许连续多少次没有改善
+verbose     是否打印模型保存信息
+delta       至少改善多少才算真正改善
+counter       连续未改善次数
+best_score    当前最佳评分
+early_stop    是否应该停止训练
+val_loss_min  当前记录的最小验证损失"""
 
     def __call__(self, val_loss, model, model_name):
 

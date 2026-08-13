@@ -1,4 +1,12 @@
-
+"""pandas               读取和保存 CSV
+Chem                 SMILES ↔ RDKit Mol
+DataStructs          Tanimoto、Dice 相似度
+rdMolDescriptors     Morgan fingerprint
+MolLogP              脂水分配系数
+qed                  药物相似性
+sascorer             合成难度
+CalcTPSA             极性表面积
+Descriptors.MolWt    分子量"""
 import pickle
 import pandas as pd
 from utils.standardization import *

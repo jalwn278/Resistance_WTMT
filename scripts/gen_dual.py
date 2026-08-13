@@ -1,20 +1,32 @@
-import sys
-import os
-import argparse
-import numpy as np
-import pandas as pd
-import time
-import torch
-from torch.utils.data import Dataset
-import torch.nn.functional as F
-from tqdm import tqdm
+import sys #system path
+import os #director reading
+import argparse #pass variable --batch_size 64
+import numpy as np #high dimension matrix
+import pandas as pd #.csv
+import time #running time
+import torch #reinforce learning
+from torch.utils.data import Dataset #dataset
+import torch.nn.functional as F #Active function and softmax
+from tqdm import tqdm #processing chart
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from model.lamgen_model import LaMGen_dual
-from utils.bert_tokenizer import ExpressionBertTokenizer
-from train_triple import Ada_config
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) #locate root director and set into python search path
+from model.lamgen_model import LaMGen_dual#2 target model
+from utils.bert_tokenizer import ExpressionBertTokenizer#vocabulary and token switch
+from train_triple import Ada_config#GPT2config
 
 abs_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+print("PyTorch version:", torch.__version__)
+print("PyTorch CUDA:", torch.version.cuda)
+print("CUDA available:", torch.cuda.is_available())
+
+if torch.cuda.is_available():
+    print("GPU:", torch.cuda.get_device_name(0))
+    print("GPU capability:", torch.cuda.get_device_capability(0))
+    print("Supported architectures:", torch.cuda.get_arch_list())
+
+    test_tensor = torch.tensor([1.0, 2.0], device="cuda")
+    print("CUDA test:", test_tensor * 2)
 
 class MyDataset(Dataset):
     def __init__(self, data_list):
@@ -35,7 +47,7 @@ def setup_args():
     parser.add_argument('--output_path', default=abs_path + '/generation/test_set1_gen.csv', type=str, help='')
     parser.add_argument('--batch_size', default=50, type=int, required=False, help='batch size')
     parser.add_argument('--epochs', default=2, type=int, required=False, help='epochs')
-    return parser.parse_args()
+    return parser.parse_args()#50 * 2
 
 def decode(matrix):
     chars = []
@@ -46,6 +58,13 @@ def decode(matrix):
     return seq
 
 
+"""model     训练好的 LaMGen_dual
+tokenizer    token 与 ID 的转换工具
+batch_size   同时生成多少条分子
+protein1     蛋白1 embedding
+protein2     蛋白2 embedding
+seed         随机种子
+text         初始提示序列"""
 @torch.no_grad()
 def predict(model, tokenizer, batch_size, protein1, protein2, seed,
             text="<|beginoftext|> <|mask:0|> <|mask:0|>"):

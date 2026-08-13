@@ -1,6 +1,10 @@
-
+"""copy              复制 RDKit 分子对象
+networkx          把分子转换成图，判断哪些键断开后会分裂
+Chem              解析 SMILES、创建分子
+AllChem           生成三维构象
+rdMolTransforms   读取和设置二面角
+numpy             将角度字符串转为浮点数组"""
 import copy
-import pandas as pd
 import networkx as nx
 from rdkit import Chem, RDLogger
 from rdkit.Chem import AllChem, rdMolTransforms
