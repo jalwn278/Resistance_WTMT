@@ -202,6 +202,8 @@ ASSET_DIR="${ENV_DIR}/assets"
 LAMGEN_ASSET_ARCHIVE="${ASSET_DIR}/lamgen_generation_assets.tar.gz"
 LAMGEN_ASSET_SHA256="${ASSET_DIR}/lamgen_generation_assets.tar.gz.sha256"
 LAMGEN_FILES_SHA256="${ASSET_DIR}/lamgen_assets.sha256"
+GITHUB_REPO="jalwn278/LaMGen_WTMT"
+LAMGEN_ASSET_ID="513908485"
 echo
 echo "------------------------------------------------------------"
 echo "Checking LaMGen generation assets"
@@ -230,9 +232,46 @@ if [ "${assets_complete}" = true ]; then
 else
 
     if [ ! -f "${LAMGEN_ASSET_ARCHIVE}" ]; then
-        echo "[ERROR] LaMGen asset archive not found:"
-        echo "        ${LAMGEN_ASSET_ARCHIVE}"
-        exit 1
+    echo "[INFO] LaMGen asset archive not found locally."
+       echo "[INFO] Downloading from GitHub Release..."
+
+        if ! command -v curl >/dev/null 2>&1; then
+            echo "[ERROR] curl is required to download LaMGen assets."
+            exit 1
+        fi
+
+        if [ -z "${GITHUB_TOKEN:-}" ]; then
+            echo "[ERROR] GITHUB_TOKEN is not set."
+            echo
+            echo "This repository is private."
+            echo "Set a GitHub token with Contents: Read permission:"
+            echo
+            echo "    export GITHUB_TOKEN='your_token'"
+            echo
+            echo "Then run setup_server.sh again."
+            exit 1
+        fi
+
+        mkdir -p "${ASSET_DIR}"
+
+        TEMP_ASSET="${LAMGEN_ASSET_ARCHIVE}.part"
+
+        rm -f "${TEMP_ASSET}"
+
+        curl -L \
+            --fail \
+            --retry 3 \
+            --retry-delay 5 \
+            --progress-bar \
+            -H "Accept: application/octet-stream" \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPO}/releases/assets/${LAMGEN_ASSET_ID}" \
+            -o "${TEMP_ASSET}"
+
+        mv "${TEMP_ASSET}" "${LAMGEN_ASSET_ARCHIVE}"
+
+        echo "[PASS] LaMGen asset archive downloaded."
     fi
 
     if [ ! -f "${LAMGEN_ASSET_SHA256}" ]; then
