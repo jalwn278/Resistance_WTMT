@@ -282,22 +282,30 @@ download_lamgen_asset() {
     mkdir -p "$(dirname "${target}")"
 
     temp_file="${target}.part"
-    rm -f "${temp_file}"
 
     echo "[INFO] Downloading ${label} from official LaMGen Zenodo..."
     echo "[INFO] Source: ${url}"
 
+    if [ -f "${temp_file}" ]; then
+        echo "[INFO] Partial download found. Attempting to resume:"
+        echo "       ${temp_file}"
+    fi
+
     if ! curl -L \
         --fail \
-        --retry 3 \
+        --retry 5 \
         --retry-delay 5 \
+        --retry-all-errors \
         --connect-timeout 15 \
+        --continue-at - \
         --progress-bar \
         "${url}" \
         -o "${temp_file}"
     then
-        rm -f "${temp_file}"
         echo "[ERROR] Failed to download ${label}."
+        echo "[INFO] Partial download has been kept:"
+        echo "       ${temp_file}"
+        echo "[INFO] Run setup_server.sh again to resume the download."
         exit 1
     fi
 
