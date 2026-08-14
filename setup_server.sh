@@ -195,19 +195,141 @@ echo "------------------------------------------------------------"
 echo "[PASS] Custom Transformers wheel installed."
 
 # ============================================================
-# Restore LaMGen generation assets
+# Prepare LaMGen generation assets from official Zenodo
 # ============================================================
 
-ASSET_DIR="${ENV_DIR}/assets"
-LAMGEN_ASSET_ARCHIVE="${ASSET_DIR}/lamgen_generation_assets.tar.gz"
-LAMGEN_ASSET_SHA256="${ASSET_DIR}/lamgen_generation_assets.tar.gz.sha256"
-LAMGEN_FILES_SHA256="${ASSET_DIR}/lamgen_assets.sha256"
-GITHUB_REPO="jalwn278/LaMGen_WTMT"
-LAMGEN_ASSET_ID="513908485"
+LAMGEN_FILES_SHA256="${ENV_DIR}/assets/lamgen_assets.sha256"
+
+ZENODO_RECORD_ID="18218936"
+
+PRETRAIN_URL="https://zenodo.org/records/${ZENODO_RECORD_ID}/files/pretrain_model.bin?download=1"
+DUAL_URL="https://zenodo.org/records/${ZENODO_RECORD_ID}/files/dual_target_ckpt?download=1"
+
+PRETRAIN_TARGET="${LAMGEN_ROOT}/Pretrained_model/pytorch_model.bin"
+DUAL_TARGET="${LAMGEN_ROOT}/checkpoint/dual/dual_target_ckpt"
+
 echo
 echo "------------------------------------------------------------"
 echo "Checking LaMGen generation assets"
 echo "------------------------------------------------------------"
+
+if ! command -v curl >/dev/null 2>&1; then
+    echo "[ERROR] curl is required to download LaMGen model weights."
+    exit 1
+fi
+
+if ! command -v sha256sum >/dev/null 2>&1; then
+    echo "[ERROR] sha256sum is required to verify LaMGen model weights."
+    exit 1
+fi
+
+if [ ! -f "${LAMGEN_FILES_SHA256}" ]; then
+    echo "[ERROR] LaMGen asset checksum file not found:"
+    echo "        ${LAMGEN_FILES_SHA256}"
+    exit 1
+fi
+
+# These small files are distributed directly with the Git repository.
+for file in \
+    "${LAMGEN_ROOT}/Pretrained_model/config.json" \
+    "${LAMGEN_ROOT}/data/torsion_voc.csv"
+do
+    if [ ! -f "${file}" ]; then
+        echo "[ERROR] Required Git-tracked LaMGen asset is missing:"
+        echo "        ${file}"
+        exit 1
+    fi
+done
+
+download_lamgen_asset() {
+    local url="$1"
+    local target="$2"
+    local relative_path="$3"
+    local label="$4"
+
+    local expected_checksum
+    local actual_checksum
+    local temp_file
+
+    expected_checksum="$(
+        awk -v file="${relative_path}" \
+            '$2 == file {print $1}' \
+            "${LAMGEN_FILES_SHA256}"
+    )"
+
+    if [ -z "${expected_checksum}" ]; then
+        echo "[ERROR] No checksum entry found for:"
+        echo "        ${relative_path}"
+        exit 1
+    fi
+
+    # If the file already exists and is correct, do not download it again.
+    if [ -f "${target}" ]; then
+        actual_checksum="$(
+            sha256sum "${target}" | awk '{print $1}'
+        )"
+
+        if [ "${actual_checksum}" = "${expected_checksum}" ]; then
+            echo "[SKIP] ${label} already exists and passed SHA256 verification."
+            return
+        fi
+
+        echo "[WARN] Existing ${label} failed SHA256 verification."
+        echo "[INFO] It will be downloaded again."
+        rm -f "${target}"
+    fi
+
+    mkdir -p "$(dirname "${target}")"
+
+    temp_file="${target}.part"
+    rm -f "${temp_file}"
+
+    echo "[INFO] Downloading ${label} from official LaMGen Zenodo..."
+    echo "[INFO] Source: ${url}"
+
+    if ! curl -L \
+        --fail \
+        --retry 3 \
+        --retry-delay 5 \
+        --connect-timeout 15 \
+        --progress-bar \
+        "${url}" \
+        -o "${temp_file}"
+    then
+        rm -f "${temp_file}"
+        echo "[ERROR] Failed to download ${label}."
+        exit 1
+    fi
+
+    actual_checksum="$(
+        sha256sum "${temp_file}" | awk '{print $1}'
+    )"
+
+    if [ "${actual_checksum}" != "${expected_checksum}" ]; then
+        rm -f "${temp_file}"
+
+        echo "[ERROR] SHA256 verification failed for ${label}."
+        echo "        Expected: ${expected_checksum}"
+        echo "        Actual:   ${actual_checksum}"
+        exit 1
+    fi
+
+    mv "${temp_file}" "${target}"
+
+    echo "[PASS] ${label} downloaded and verified."
+}
+
+download_lamgen_asset \
+    "${PRETRAIN_URL}" \
+    "${PRETRAIN_TARGET}" \
+    "Pretrained_model/pytorch_model.bin" \
+    "LaMGen pretrained model"
+
+download_lamgen_asset \
+    "${DUAL_URL}" \
+    "${DUAL_TARGET}" \
+    "checkpoint/dual/dual_target_ckpt" \
+    "LaMGen dual-target checkpoint"
 
 required_lamgen_assets=(
     "${LAMGEN_ROOT}/Pretrained_model/config.json"
@@ -216,114 +338,24 @@ required_lamgen_assets=(
     "${LAMGEN_ROOT}/data/torsion_voc.csv"
 )
 
-assets_complete=true
-
 for file in "${required_lamgen_assets[@]}"; do
     if [ ! -f "${file}" ]; then
-        assets_complete=false
-        break
-    fi
-done
-
-if [ "${assets_complete}" = true ]; then
-
-    echo "[SKIP] LaMGen generation assets already exist."
-
-else
-
-    if [ ! -f "${LAMGEN_ASSET_ARCHIVE}" ]; then
-    echo "[INFO] LaMGen asset archive not found locally."
-       echo "[INFO] Downloading from GitHub Release..."
-
-        if ! command -v curl >/dev/null 2>&1; then
-            echo "[ERROR] curl is required to download LaMGen assets."
-            exit 1
-        fi
-
-        if [ -z "${GITHUB_TOKEN:-}" ]; then
-            echo "[ERROR] GITHUB_TOKEN is not set."
-            echo
-            echo "This repository is private."
-            echo "Set a GitHub token with Contents: Read permission:"
-            echo
-            echo "    export GITHUB_TOKEN='your_token'"
-            echo
-            echo "Then run setup_server.sh again."
-            exit 1
-        fi
-
-        mkdir -p "${ASSET_DIR}"
-
-        TEMP_ASSET="${LAMGEN_ASSET_ARCHIVE}.part"
-
-        rm -f "${TEMP_ASSET}"
-
-        curl -L \
-            --fail \
-            --retry 3 \
-            --retry-delay 5 \
-            --progress-bar \
-            -H "Accept: application/octet-stream" \
-            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${GITHUB_REPO}/releases/assets/${LAMGEN_ASSET_ID}" \
-            -o "${TEMP_ASSET}"
-
-        mv "${TEMP_ASSET}" "${LAMGEN_ASSET_ARCHIVE}"
-
-        echo "[PASS] LaMGen asset archive downloaded."
-    fi
-
-    if [ ! -f "${LAMGEN_ASSET_SHA256}" ]; then
-        echo "[ERROR] LaMGen asset checksum not found:"
-        echo "        ${LAMGEN_ASSET_SHA256}"
-        exit 1
-    fi
-
-    echo "[INFO] Verifying LaMGen asset archive..."
-
-    (
-        cd "${ASSET_DIR}"
-        sha256sum -c lamgen_generation_assets.tar.gz.sha256
-    )
-
-    echo "[INFO] Restoring LaMGen generation assets..."
-
-    tar -xzf "${LAMGEN_ASSET_ARCHIVE}" \
-        -C "${LAMGEN_ROOT}"
-
-    echo "[PASS] LaMGen generation assets restored."
-
-fi
-
-
-# ============================================================
-# Verify restored LaMGen assets
-# ============================================================
-
-for file in "${required_lamgen_assets[@]}"; do
-    if [ ! -f "${file}" ]; then
-        echo "[ERROR] Required LaMGen asset missing after restore:"
+        echo "[ERROR] Required LaMGen asset is missing:"
         echo "        ${file}"
         exit 1
     fi
 done
 
-echo "[PASS] LaMGen generation assets available."
-if [ ! -f "${LAMGEN_FILES_SHA256}" ]; then
-    echo "[ERROR] LaMGen asset file checksum not found:"
-    echo "        ${LAMGEN_FILES_SHA256}"
-    exit 1
-fi
-
-echo "[INFO] Verifying LaMGen generation asset files..."
+echo "[INFO] Verifying all LaMGen generation asset files..."
 
 (
     cd "${LAMGEN_ROOT}"
-    sha256sum -c resistance_project/environment/assets/lamgen_assets.sha256
+    sha256sum -c \
+        resistance_project/environment/assets/lamgen_assets.sha256
 )
 
 echo "[PASS] LaMGen generation asset files verified."
+
 # ============================================================
 # Prepare fixed ESM-C model snapshot
 # ============================================================
