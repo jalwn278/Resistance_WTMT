@@ -1,0 +1,10 @@
+# ESMFold EGFR 激酶结构域预测依赖
+# 关键：transformers 必须 4.x（>=5.0 已移除 ESMFold，无法导入 EsmForProteinFolding）
+
+torch==2.5.1
+transformers==4.40.2
+tokenizers<0.20
+huggingface-hub<1.0
+biopython>=1.79
+tqdm>=4.64
+numpy
