@@ -1,0 +1,2 @@
+candidate_id,status,Smiles,GEO,target1,target2,n_atoms,n_geo_angles,n_torsions,sdf_path,error
+molecule_0001,PASS,CC1C2=C(C=CC(=C2)F)C(=O)N(CC3=NN(C(=C3C4=CC(=C(N=C4)N)O1)C#N)C)C,0.15,Q9UM73_WT,Q9UM73_L1196M,30,1,1,resistance_project/molecules/test1/molecule_0001.sdf,

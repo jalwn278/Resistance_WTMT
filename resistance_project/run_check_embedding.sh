@@ -14,7 +14,7 @@ LAMGEN_ROOT="$(
 
 ESMC_PYTHON="${ESMC_PYTHON:-python}"
 
-CHECK_SCRIPT="${PROJECT_ROOT}/scripts/check_embedding.py"
+CHECK_SCRIPT="${PROJECT_ROOT}/scripts/embedding/check_embedding.py"
 EMBEDDING_DIR="${PROJECT_ROOT}/embeddings"
 
 if [ "$#" -lt 1 ]; then

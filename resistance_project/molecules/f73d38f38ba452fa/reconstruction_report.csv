@@ -1,0 +1,25 @@
+candidate_id,status,Smiles,GEO,target1,target2,n_atoms,n_geo_angles,n_torsions,sdf_path,error
+molecule_0001,PASS,CNC(=O)c1ccc(Nc2ncc3CN(c4c(Cl)c(OC)cc(OC)c4Cl)C(=O)N(C)c3n2)cc1,-0.09 0.52 -0.09 -3.00 1.40 3.09 -0.04,P10721_WT,P10721_T670I,35,7,7,resistance_project/molecules/f73d38f38ba452fa/molecule_0001.sdf,
+molecule_0002,PASS,CN(C)CC(=O)N1CCC(c2cc(NC(=O)c3nc(C#N)c[nH]3)c(C3=CCCCC3)cc2)CC1,-3.03 -2.12 -0.02 -1.14 -0.06 0.00 2.61 3.03 -1.46,P10721_WT,P10721_T670I,34,9,9,resistance_project/molecules/f73d38f38ba452fa/molecule_0002.sdf,
+molecule_0003,PASS,CCN(CC)CCNC(=O)c1c(C)[nH]c2c1CCC=C2c1c(O)[nH]c2ccc(F)cc12,-3.01 3.03 1.11 -3.10 -1.42 -0.07 0.52 -0.90,P10721_WT,P10721_T670I,31,8,8,resistance_project/molecules/f73d38f38ba452fa/molecule_0003.sdf,
+molecule_0004,FAIL,CN#Cc1c[nH]c(C(=O)Nc2ccc(CCN(C)C)cc2C(N)=O)c1,2.12 0.19 2.65 3.12 -0.10 -1.76 3.11 1.21 -0.19,P10721_WT,P10721_T670I,,,,,ValueError: Invalid SMILES: CN#Cc1c[nH]c(C(=O)Nc2ccc(CCN(C)C)cc2C(N)=O)c1
+molecule_0005,PASS,COc1ccc(NC(=O)Nc2cc3c(cc2)C(=Cc2ccc[nH]2)C(=O)N3)cc1OC,0.02 -2.91 -0.01 -3.12 -2.84 -3.12 -2.84 0.05,P10721_WT,P10721_T670I,30,8,8,resistance_project/molecules/f73d38f38ba452fa/molecule_0005.sdf,
+molecule_0006,PASS,CC1(C)CC(NC(=O)c2cccc(Nc3nccc(-c4cnccc4)n3)c2)CC(C)(C)N1[O],2.50 -0.09 -0.54 0.37 -0.30 2.93,P10721_WT,P10721_T670I,33,6,6,resistance_project/molecules/f73d38f38ba452fa/molecule_0006.sdf,
+molecule_0007,PASS,CCN(CC)CCNC(=O)c1c(C)[nH]c2c1CCCC2=C1C(=O)Nc2ccc(F)cc12,-2.99 2.99 1.12 -3.12 -1.39 -0.09 0.53 -0.28,P10721_WT,P10721_T670I,31,8,8,resistance_project/molecules/f73d38f38ba452fa/molecule_0007.sdf,
+molecule_0008,PASS,Cc1c(C(=O)NCCCN2CCOCC2)c2c([nH]1)C(c1c(O)[nH]c3ccc(F)cc13)=CCC2,0.56 3.07 1.29 2.95 0.93 -2.91 -2.14,P10721_WT,P10721_T670I,33,7,7,resistance_project/molecules/f73d38f38ba452fa/molecule_0008.sdf,
+molecule_0009,PASS,COc1c(OC)cc(Nc2nn3c(-c4cc(C(F)(F)F)ccc4)nc(C)c3cn2)cc1,2.98 1.57 2.66 -3.10 2.57 -2.58,P10721_WT,P10721_T670I,31,6,6,resistance_project/molecules/f73d38f38ba452fa/molecule_0009.sdf,
+molecule_0010,PASS,COc1ccc(NC(=O)Nc2ccc(-c3c(C)ccc4c3c(N)no4)cc2)cc1OC,-0.01 -0.21 -0.09 3.07 -0.17 1.76 -0.06,P10721_WT,P10721_T670I,31,7,7,resistance_project/molecules/f73d38f38ba452fa/molecule_0010.sdf,
+molecule_0011,PASS,CCN(CC)CCNC(=O)c1c(C)[nH]c2c1CCCC2=C1C(=O)Nc2ccc(Oc3ccccc3)cc12,-3.01 3.01 1.12 -3.10 -1.39 -0.09 0.49 -0.24 -2.41 0.91,P10721_WT,P10721_T670I,37,10,10,resistance_project/molecules/f73d38f38ba452fa/molecule_0011.sdf,
+molecule_0012,PASS,Cc1cc(C)c(C=C2C(=O)Nc3c2cc(C(=O)NN2CCCC2)cc3)[nH]1,3.11 3.13 2.67 -2.99 1.62,P10721_WT,P10721_T670I,26,5,5,resistance_project/molecules/f73d38f38ba452fa/molecule_0012.sdf,
+molecule_0013,FAIL,CN1CCN(CCCC(=O)Nc2ccc2NC(=O)c2c(Nc3ccc(NC(=O)N4CCCC4)cc3)cn[nH]2)CC1,0.88 1.01 3.05 -0.52 3.09 -0.32 -0.16 0.03 2.87 -2.83 0.07 1.04,P10721_WT,P10721_T670I,,,,,ValueError: 12 GEO angles 14 torsions
+molecule_0014,PASS,Cc1c(-c2ccc(NC(=O)Nc3ccc(Cl)c(C(F)(F)F)c3)cc2)c2c(ncnc2N)s1,-1.74 2.97 -0.06 3.11 2.94 -3.13,P10721_WT,P10721_T670I,32,6,6,resistance_project/molecules/f73d38f38ba452fa/molecule_0014.sdf,
+molecule_0015,PASS,CCN(CC)CCN1CCc2c(C1=O)c(C)c(C=C1C(=O)Nc3ccc(F)cc13)[nH]2,0.97 1.12 2.91 3.12 -1.35 -1.16 -3.13,P10721_WT,P10721_T670I,30,7,7,resistance_project/molecules/f73d38f38ba452fa/molecule_0015.sdf,
+molecule_0016,PASS,Nc1c2c(-c3ccc(NC(=O)Nc4c(C(F)(F)F)cccc4)cc3)cccc2n[nH]1,-1.97 -3.04 0.09 -3.05 -3.00 -0.18,P10721_WT,P10721_T670I,30,6,6,resistance_project/molecules/f73d38f38ba452fa/molecule_0016.sdf,
+molecule_0017,PASS,COC(=O)c1ccc2c(C(=Nc3ccc(N(C)C(=O)CN4CCN(C)CC4)cc3)c3ccccc3)c(O)[nH]c2c1,0.01 3.10 2.95 3.10 -1.18 1.80 0.21 -0.18 1.37 1.12,P10721_WT,P10721_T670I,40,10,10,resistance_project/molecules/f73d38f38ba452fa/molecule_0017.sdf,
+molecule_0018,FAIL,Cc1c(Nc2nc(-c3cncnc3)ccn2)cc(NC(=O)c2cc(C(F)(F)F)c(CN3CC(N(C)C)C3)cc2)cc1,-3.09 3.09 2.79 -2.87 -0.01 0.62 -0.13 1.12 1.25,P10721_WT,P10721_T670I,,,,,ValueError: 9 GEO angles 10 torsions
+molecule_0019,PASS,CN1CCN(Cc2ccc3[nH]c(-c4c(O)nc5ccccc5c4N)nc3c2)CC1,-1.19 -1.05 0.15,P10721_WT,P10721_T670I,29,3,3,resistance_project/molecules/f73d38f38ba452fa/molecule_0019.sdf,
+molecule_0020,PASS,COc1cc2c(C(=O)c3c(cc(C)c(O)c3O)C2=O)c(O)c1,3.14,P10721_WT,P10721_T670I,22,1,1,resistance_project/molecules/f73d38f38ba452fa/molecule_0020.sdf,
+molecule_0021,PASS,CC1(C)CC(NC2CCc3c(C2)c(N)nc(N)n3)CC(C)(C)N1O,-1.47 -3.06,P10721_WT,P10721_T670I,24,2,2,resistance_project/molecules/f73d38f38ba452fa/molecule_0021.sdf,
+molecule_0022,PASS,Cc1cc(NC(=O)Nc2c(C)cc(-c3cccc4c3CNC4=O)cc2)ccc1,-0.17 -0.05 3.09 2.94 -1.92,P10721_WT,P10721_T670I,28,5,5,resistance_project/molecules/f73d38f38ba452fa/molecule_0022.sdf,
+molecule_0023,PASS,Cc1c(Nc2nccc(-c3ccccc3)n2)ccc(NC(=O)c2cccc(NC(=O)C=CCN(C)C)c2)c1,-2.94 -2.81 0.56 0.31 0.05 -2.38 0.03 0.04 3.08 0.03 -2.21 1.31,P10721_WT,P10721_T670I,38,12,12,resistance_project/molecules/f73d38f38ba452fa/molecule_0023.sdf,
+molecule_0024,PASS,Cc1c(Nc2nccc(-c3cccnc3)n2)cc(NC(=O)c2ccc(CN3CCN(C)CC3)cc2)cc1,2.95 -0.07 -2.58 0.05 0.00 0.65 -2.23 1.21,P10721_WT,P10721_T670I,37,8,8,resistance_project/molecules/f73d38f38ba452fa/molecule_0024.sdf,

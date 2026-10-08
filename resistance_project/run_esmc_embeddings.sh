@@ -14,7 +14,7 @@ LAMGEN_ROOT="$(
 
 ESMC_PYTHON="${ESMC_PYTHON:-python}"
 
-ESMC_SCRIPT="${PROJECT_ROOT}/scripts/esmc_embeddings.py"
+ESMC_SCRIPT="${PROJECT_ROOT}/scripts/embedding/esmc_embeddings.py"
 SEQUENCE_DIR="${PROJECT_ROOT}/data/sequences"
 OUTPUT_DIR="${PROJECT_ROOT}/embeddings"
 
